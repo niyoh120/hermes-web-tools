@@ -1,4 +1,4 @@
-"""Tests for config parsing — multi-key split, bools, int defaults, availability."""
+"""Tests for config parsing — bools, int defaults, availability."""
 
 from __future__ import annotations
 
@@ -30,7 +30,7 @@ def test_defaults_when_env_empty(monkeypatch):
         monkeypatch.delenv(var, raising=False)
     cfg = load_config()
     assert cfg.exa_api_key == ""
-    assert cfg.tavily_keys == []
+    assert cfg.tavily_api_key == ""
     assert cfg.has_exa is False
     assert cfg.has_tavily is False
     assert cfg.has_firecrawl is False
@@ -52,20 +52,15 @@ def test_base_urls(monkeypatch):
     assert cfg.mineru_base_url == "https://mineru.local"
 
 
-def test_tavily_multi_key_split(monkeypatch):
-    monkeypatch.setenv("TAVILY_API_KEY", "key1, key2 ,, key3")
+def test_tavily_single_key(monkeypatch):
+    monkeypatch.setenv("TAVILY_API_KEY", "key1")
     cfg = load_config()
-    assert cfg.tavily_keys == ["key1", "key2", "key3"]
+    assert cfg.tavily_api_key == "key1"
     assert cfg.has_tavily is True
 
 
-def test_tavily_json_key_split(monkeypatch):
-    monkeypatch.setenv("TAVILY_API_KEY", '["key1", "key2"]')
-    assert load_config().tavily_keys == ["key1", "key2"]
-
-
 def test_config_repr_hides_keys_and_clamps_limits():
-    cfg = Config(exa_api_key="secret", tavily_keys=["t1"], max_content_chars=10, max_total_chars=5)
+    cfg = Config(exa_api_key="secret", tavily_api_key="t1", max_content_chars=10, max_total_chars=5)
     text = repr(cfg)
     assert "secret" not in text and "t1" not in text
     assert cfg.max_content_chars == 5

@@ -1,20 +1,10 @@
-"""Tavily backend — /search and /extract, with sticky multi-key rotation.
+"""Tavily backend — /search and /extract.
 
 Auth: ``api_key`` in the JSON body (widely supported across Tavily API versions).
-
-Key rotation (sticky):
-- default to the current key
-- HTTP 429 -> advance to next key, retry within the same call
-- HTTP 401/403 -> drop the key from the pool, continue
-- exhaust the pool -> raise BackendError(rate_limited|auth)
-
-All pool mutations are guarded by an ``asyncio.Lock`` so concurrent requests
-don't race the index.
 """
 
 from __future__ import annotations
 
-import asyncio
 from typing import Any
 
 import httpx
@@ -29,72 +19,26 @@ class TavilyBackend:
     def __init__(self, cfg: Config, client: httpx.AsyncClient | None = None):
         self.cfg = cfg
         self._client = client
-        self._keys: list[str] = list(cfg.tavily_keys)
-        self._idx = 0
-        self._lock = asyncio.Lock()
 
     def available(self) -> bool:
-        return bool(self._keys)
-
-    async def _next_key(self, tried: set[str], drop: str | None = None) -> str | None:
-        """Return the current sticky key, skipping keys tried by this request."""
-        async with self._lock:
-            if drop is not None and drop in self._keys:
-                self._keys.remove(drop)
-                if self._idx >= len(self._keys):
-                    self._idx = 0
-            if not self._keys:
-                return None
-            n = len(self._keys)
-            for step in range(n):
-                idx = (self._idx + step) % n
-                key = self._keys[idx]
-                if key not in tried:
-                    self._idx = idx
-                    return key
-            return None
-
-    async def _advance_after(self, key: str) -> None:
-        async with self._lock:
-            if key in self._keys and len(self._keys) > 1:
-                self._idx = (self._keys.index(key) + 1) % len(self._keys)
+        return bool(self.cfg.tavily_api_key)
 
     async def _request(self, path: str, body: dict, timeout: float) -> Any:
-        """Try each key at most once for this request, rotating on 429/auth."""
-        tried: set[str] = set()
-        last_error: BackendError | None = None
-        drop: str | None = None
-        while True:
-            key = await self._next_key(tried, drop=drop)
-            if key is None:
-                break
-            drop = None
-            payload = {**body, "api_key": key}
-            client = self._client or httpx.AsyncClient()
-            try:
-                return await request_json(
-                    client,
-                    "POST",
-                    f"{self.cfg.tavily_base_url}{path}",
-                    json_body=payload,
-                    timeout=timeout,
-                )
-            except BackendError as exc:
-                last_error = exc
-                tried.add(key)
-                if exc.reason == "auth":
-                    drop = key
-                    continue
-                if exc.reason == "rate_limited":
-                    await self._advance_after(key)
-                    await asyncio.sleep(0)  # yield before trying next key; no test slowdown
-                    continue
-                raise
-            finally:
-                if self._client is None:
-                    await client.aclose()
-        reason = last_error.reason if last_error else "unavailable"
-        raise BackendError(reason, f"all tavily keys exhausted ({reason})")
+        if not self.available():
+            raise BackendError("unavailable", "TAVILY_API_KEY not set")
+        payload = {**body, "api_key": self.cfg.tavily_api_key}
+        client = self._client or httpx.AsyncClient()
+        try:
+            return await request_json(
+                client,
+                "POST",
+                f"{self.cfg.tavily_base_url}{path}",
+                json_body=payload,
+                timeout=timeout,
+            )
+        finally:
+            if self._client is None:
+                await client.aclose()
 
     # --- search ---
 

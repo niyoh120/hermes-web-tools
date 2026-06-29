@@ -2,12 +2,11 @@
 
 All network-bearing tools self-gate via ``check_fn`` (see ``handlers.py``);
 this module only exposes cheap primitives (env-var presence, parsed numbers,
-multi-key lists). No network calls happen here.
+credentials). No network calls happen here.
 """
 
 from __future__ import annotations
 
-import json
 import os
 import warnings
 from dataclasses import dataclass, field
@@ -56,26 +55,12 @@ def _int_env(name: str, default: int, minimum: int = 1) -> int:
     return value
 
 
-def _split_keys(raw: str | None) -> list[str]:
-    if not raw:
-        return []
-    raw = raw.strip()
-    if raw.startswith("["):
-        try:
-            parsed = json.loads(raw)
-        except json.JSONDecodeError:
-            parsed = None
-        if isinstance(parsed, list):
-            return [str(k).strip() for k in parsed if str(k).strip()]
-    return [k.strip().strip('"').strip("'") for k in raw.split(",") if k.strip()]
-
-
 @dataclass
 class Config:
     # Provider credentials.
     exa_api_key: str = field(default="", repr=False)
     exa_base_url: str = field(default=_DEFAULTS["exa_base_url"], repr=False)
-    tavily_keys: list[str] = field(default_factory=list, repr=False)
+    tavily_api_key: str = field(default="", repr=False)
     tavily_base_url: str = field(default=_DEFAULTS["tavily_base_url"], repr=False)
     firecrawl_api_key: str = field(default="", repr=False)
     firecrawl_base_url: str = field(default=_DEFAULTS["firecrawl_base_url"], repr=False)
@@ -108,7 +93,7 @@ class Config:
 
     @property
     def has_tavily(self) -> bool:
-        return len(self.tavily_keys) > 0
+        return bool(self.tavily_api_key)
 
     @property
     def has_firecrawl(self) -> bool:
@@ -129,7 +114,7 @@ def load_config() -> Config:
         exa_api_key=os.getenv("EXA_API_KEY", "").strip(),
         exa_base_url=os.getenv("EXA_BASE_URL", _DEFAULTS["exa_base_url"]).strip().rstrip("/")
         or _DEFAULTS["exa_base_url"],
-        tavily_keys=_split_keys(os.getenv("TAVILY_API_KEY")),
+        tavily_api_key=os.getenv("TAVILY_API_KEY", "").strip(),
         tavily_base_url=os.getenv("TAVILY_BASE_URL", _DEFAULTS["tavily_base_url"])
         .strip()
         .rstrip("/")

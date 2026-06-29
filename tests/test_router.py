@@ -21,7 +21,7 @@ def cfg(**flags):
     if flags.get("exa"):
         c.exa_api_key = "exa"
     if flags.get("tavily"):
-        c.tavily_keys = ["t"]
+        c.tavily_api_key = "t"
     if flags.get("grok"):
         c.grok_api_url = "https://grok"
         c.grok_api_key = "g"
