@@ -22,16 +22,24 @@ specialized tool returns too little, the model is expected to try another tool.
 
 ## Install
 
+From GitHub:
+
 ```bash
+hermes plugins install https://github.com/niyoh120/hermes-web-tools
+```
+
+For development:
+
+```bash
+git clone https://github.com/niyoh120/hermes-web-tools.git
+cd hermes-web-tools
 python -m venv .venv
 . .venv/bin/activate
 pip install -e ".[dev]"
 pytest
 ```
 
-Enable in Hermes by dropping this directory into `~/.hermes/plugins/` (or
-`pip install` it, which registers the `hermes_agent.plugins` entry point) and
-loading the plugin via `hermes plugins`.
+Enable in Hermes with `hermes plugins` after installation.
 
 ## Configuration
 
