@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import importlib.util
+from pathlib import Path
+
 import hermes_web_tools
 
 
@@ -39,3 +42,12 @@ def test_register_schema_names_match_tool_names():
     for call in ctx.calls:
         assert call["schema"]["name"] == call["name"]
         assert call["description"] == call["schema"]["description"]
+
+
+def test_plugin_root_entrypoint_exports_register():
+    root_init = Path(__file__).resolve().parents[1] / "__init__.py"
+    spec = importlib.util.spec_from_file_location("hermes_web_tools_plugin_root", root_init)
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    assert module.register is hermes_web_tools.register
