@@ -1,0 +1,12 @@
+name: hermes-web-tools
+version: "0.1.0"
+description: "Multi-provider web search, code context, Q&A and extract with category routing"
+author: hnpgc
+provides_tools:
+  - web_search
+  - web_search_realtime
+  - web_search_research
+  - web_search_code
+  - web_search_entities
+  - web_answer
+  - web_extract

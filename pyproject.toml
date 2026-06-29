@@ -1,0 +1,58 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "hermes-web-tools"
+version = "0.1.0"
+description = "Multi-provider web search, code context, Q&A and extract with category routing for Hermes agent"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+authors = [{ name = "hnpgc" }]
+keywords = ["hermes", "web", "search", "exa", "tavily", "grok", "firecrawl", "mineru"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+]
+dependencies = ["httpx>=0.27"]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0.0", "ruff>=0.4.0"]
+
+[project.urls]
+Repository = "https://github.com/hnpgc/hermes-web-tools"
+
+[project.entry-points."hermes_agent.plugins"]
+hermes-web-tools = "hermes_web_tools:register"
+
+[tool.hatch.build.targets.wheel]
+packages = ["hermes_web_tools"]
+artifacts = ["plugin.yaml"]
+
+[tool.hatch.build.targets.sdist]
+include = ["/hermes_web_tools", "/tests", "/README.md", "/plugin.yaml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+addopts = "-q"
+filterwarnings = [
+  "ignore::DeprecationWarning",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP"]
+ignore = ["E501"]
