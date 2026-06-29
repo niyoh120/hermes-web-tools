@@ -128,7 +128,7 @@ def test_all_failed_search_returns_error():
     assert "all providers failed" in out["error"]
 
 
-def test_realtime_uses_grok_and_exa_not_tavily_even_if_configured():
+def test_realtime_uses_only_grok_even_if_others_configured():
     exa = FakeExa()
     grok = FakeGrok()
     r = ToolRouter(
@@ -139,8 +139,8 @@ def test_realtime_uses_grok_and_exa_not_tavily_even_if_configured():
     )
     out = run(r.web_search_realtime("now", limit=3))
     assert out["success"] is True
-    assert exa.calls[0][2] == "news"
-    assert grok.calls
+    assert grok.calls == [("now", 3)]
+    assert exa.calls == []
 
 
 def test_research_sets_exa_research_and_deep():

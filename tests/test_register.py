@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import sys
 from pathlib import Path
 
 import hermes_web_tools
@@ -45,9 +46,21 @@ def test_register_schema_names_match_tool_names():
 
 
 def test_plugin_root_entrypoint_exports_register():
-    root_init = Path(__file__).resolve().parents[1] / "__init__.py"
-    spec = importlib.util.spec_from_file_location("hermes_web_tools_plugin_root", root_init)
+    root = Path(__file__).resolve().parents[1]
+    spec = importlib.util.spec_from_file_location(
+        "hermes_web_tools_plugin_root",
+        root / "__init__.py",
+        submodule_search_locations=[str(root)],
+    )
     assert spec and spec.loader
     module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    assert module.register is hermes_web_tools.register
+    sys.modules[spec.name] = module
+    try:
+        spec.loader.exec_module(module)
+        ctx = FakeCtx()
+        module.register(ctx)
+        assert len(ctx.calls) == 7
+    finally:
+        for name in list(sys.modules):
+            if name == spec.name or name.startswith(f"{spec.name}."):
+                sys.modules.pop(name, None)

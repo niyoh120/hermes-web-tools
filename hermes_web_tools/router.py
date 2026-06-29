@@ -62,8 +62,6 @@ class ToolRouter:
         calls: list[tuple[str, SearchCall]] = []
         if self.cfg.has_grok:
             calls.append(("grok", lambda: self.grok.search(query, limit=limit)))
-        if self.cfg.has_exa:
-            calls.append(("exa", lambda: self.exa.search(query, limit=limit, category="news")))
         return await self._run_search(calls, limit)
 
     async def web_search_research(self, query: str, limit: int = 5) -> dict:

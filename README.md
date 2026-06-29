@@ -9,7 +9,7 @@ specialized search tools that the model can pick based on query intent.
 | Tool | Purpose | Providers |
 | --- | --- | --- |
 | `web_search` | General web search (overrides built-in) | Tavily + Exa(auto) |
-| `web_search_realtime` | News / trending / X-Twitter | Grok + Exa(news) |
+| `web_search_realtime` | News / trending / X-Twitter | Grok |
 | `web_search_research` | Papers / deep research | Exa(research, deep) + Tavily(advanced) |
 | `web_search_code` | Code context from GitHub / docs / SO | Exa `/context` |
 | `web_search_entities` | People / companies / financial reports | Exa + Tavily |

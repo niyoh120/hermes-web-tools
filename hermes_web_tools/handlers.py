@@ -149,9 +149,7 @@ def check_web_search() -> bool:
 
 
 def check_web_search_realtime() -> bool:
-    cfg = load_config()
-    # Tavily removed here: realtime strategy is Grok + Exa(news), no search fallback.
-    return cfg.has_grok or cfg.has_exa
+    return load_config().has_grok
 
 
 def check_web_search_research() -> bool:

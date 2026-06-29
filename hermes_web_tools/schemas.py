@@ -34,7 +34,7 @@ WEB_SEARCH_REALTIME = {
     "name": "web_search_realtime",
     "description": (
         "Search for current events, breaking news, trending topics, or X/Twitter-related "
-        "information. Uses realtime-oriented providers. Returns a ranked list of web results."
+        "information. Uses Grok. Returns a ranked list of web results."
     ),
     "parameters": {
         "type": "object",

@@ -52,6 +52,7 @@ class GrokBackend:
                 {"role": "user", "content": f"{safe_query}\n\nReturn up to {limit} results."},
             ],
             "temperature": 0.2,
+            "stream": False,
         }
         headers = {"Authorization": f"Bearer {self.cfg.grok_api_key}"}
         client = self._client or httpx.AsyncClient()

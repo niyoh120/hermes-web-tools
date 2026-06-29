@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 
 import httpx
 
@@ -41,7 +42,7 @@ def test_search_parses_json_array(monkeypatch):
     def handler(req):
         seen["path"] = str(req.url)
         seen["auth"] = req.headers.get("authorization")
-        seen["model"] = req.content
+        seen["body"] = json.loads(req.content)
         return _resp(
             '[{"title":"A","url":"https://x.com/a","description":"d"},'
             '{"title":"B","url":"https://x.com/b","description":"e"}]'
@@ -51,6 +52,7 @@ def test_search_parses_json_array(monkeypatch):
     items = run(be.search("q", limit=5))
     assert seen["path"] == "https://grok.local/v1/chat/completions"
     assert seen["auth"] == "Bearer k"
+    assert seen["body"]["stream"] is False
     assert len(items) == 2
     assert items[0].provider == "grok" and items[0].position == 1
     assert items[0].extra.get("generated_by_llm") is True

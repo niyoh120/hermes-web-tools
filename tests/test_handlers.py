@@ -140,4 +140,8 @@ def test_check_fns(monkeypatch):
     monkeypatch.setenv("EXA_API_KEY", "e")
     assert handlers.check_web_search_code() is True
     assert handlers.check_web_answer() is True
+    assert handlers.check_web_search_realtime() is False
+
+    monkeypatch.setenv("GROK_API_URL", "https://grok.local")
+    monkeypatch.setenv("GROK_API_KEY", "g")
     assert handlers.check_web_search_realtime() is True
