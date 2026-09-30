@@ -13,7 +13,7 @@ from dataclasses import dataclass, field
 
 # Defaults are deliberately conservative; every value is overridable via env.
 _DEFAULTS = {
-    "search_timeout": 15,
+    "search_timeout": 60,
     "extract_timeout": 120,
     "head_timeout": 3,
     "max_urls": 10,

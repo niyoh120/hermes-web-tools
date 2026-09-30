@@ -36,7 +36,7 @@ def test_defaults_when_env_empty(monkeypatch):
     assert cfg.has_firecrawl is False
     assert cfg.has_grok is False
     assert cfg.has_mineru is False
-    assert cfg.search_timeout == 15
+    assert cfg.search_timeout == 60
     assert cfg.max_urls == 10
 
 
@@ -77,9 +77,9 @@ def test_bool_env_variants(monkeypatch):
 
 def test_int_env_invalid_falls_back(monkeypatch):
     monkeypatch.setenv("HERMES_WEB_TOOLS_SEARCH_TIMEOUT", "not-a-number")
-    assert load_config().search_timeout == 15
+    assert load_config().search_timeout == 60
     monkeypatch.setenv("HERMES_WEB_TOOLS_SEARCH_TIMEOUT", "0")
-    assert load_config().search_timeout == 15  # below minimum -> default
+    assert load_config().search_timeout == 60  # below minimum -> default
     monkeypatch.setenv("HERMES_WEB_TOOLS_SEARCH_TIMEOUT", "42")
     assert load_config().search_timeout == 42
 
